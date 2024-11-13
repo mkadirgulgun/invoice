@@ -1,0 +1,978 @@
+﻿@model InvoiceModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #F8F8FB;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            width: 80px;
+            height: 100vh;
+            background: #373B53;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: #7C5DFA;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding: 24px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            border-top: 1px solid #494E6E;
+        }
+
+        .theme-toggle {
+            color: #858BB2;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #FFF;
+        }
+
+        .main-content {
+            margin-left: 80px;
+            padding: 32px;
+            max-width: 1000px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #7E88C3;
+            text-decoration: none;
+            margin-bottom: 32px;
+        }
+
+        .status-bar {
+            background: white;
+            padding: 20px 32px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .status-label {
+            color: #858BB2;
+            margin-right: 16px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 6px;
+            background: rgba(255, 143, 0, 0.1);
+            color: #FF8F00;
+        }
+
+            .status-badge::before {
+                content: "";
+                display: inline-block;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: currentColor;
+                margin-right: 8px;
+            }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .button {
+            padding: 16px 24px;
+            border-radius: 24px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .button-edit {
+            background: #F9FAFE;
+            color: #7E88C3;
+        }
+
+        .button-delete {
+            background: #EC5757;
+            color: white;
+        }
+
+        .button-paid {
+            background: #7C5DFA;
+            color: white;
+        }
+
+        .invoice-details {
+            background: white;
+            border-radius: 8px;
+            padding: 48px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Edit Panel Styles */
+        .edit-panel {
+            position: fixed;
+            left: -700px;
+            top: 0;
+            bottom: 0;
+            width: 700px;
+            background: white;
+            padding: 56px;
+            overflow-y: auto;
+            transition: left 0.3s ease-in-out;
+            z-index: 40;
+        }
+
+            .edit-panel.active {
+                left: 80px;
+            }
+
+        .edit-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 48px;
+            color: #0C0E16;
+        }
+
+        .form-section {
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            color: #7C5DFA;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            color: #7E88C3;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid #DFE3FA;
+            border-radius: 4px;
+            font-size: 15px;
+            color: #0C0E16;
+        }
+
+            .form-input:focus {
+                outline: none;
+                border-color: #7C5DFA;
+            }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+        }
+
+        .date-payment {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .item-list {
+            margin-top: 32px;
+        }
+
+        .item-header {
+            display: grid;
+            grid-template-columns: 3fr 1fr 2fr 1fr auto;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 3fr 1fr 2fr 1fr auto;
+            gap: 16px;
+            margin-bottom: 16px;
+            align-items: center;
+        }
+
+        .delete-item {
+            color: #888EA0;
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .add-item-btn {
+            width: 100%;
+            padding: 16px;
+            background: #F9FAFE;
+            border: none;
+            border-radius: 24px;
+            color: #7E88C3;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+
+        .form-footer {
+            position: sticky;
+            bottom: -56px;
+            margin: 32px -56px 0;
+            padding: 32px 56px;
+            background: white;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid #DFE3FA;
+        }
+
+        .btn {
+            padding: 16px 24px;
+            border-radius: 24px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            min-width: 120px;
+        }
+
+        .btn-cancel {
+            background: #F9FAFE;
+            color: #7E88C3;
+        }
+
+        .btn-save {
+            background: #7C5DFA;
+            color: white;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+            .modal-overlay.active {
+                display: flex;
+            }
+
+        .modal {
+            background: white;
+            padding: 48px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0C0E16;
+            margin-bottom: 12px;
+        }
+
+        .modal-content {
+            color: #888EA0;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .btn-modal-cancel {
+            background: #F9FAFE;
+            color: #7E88C3;
+        }
+
+        .btn-modal-delete {
+            background: #EC5757;
+            color: white;
+        }
+
+        /* Additional invoice details styles */
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .invoice-id {
+            font-size: 16px;
+            color: #0C0E16;
+            font-weight: bold;
+        }
+
+            .invoice-id span {
+                color: #7E88C3;
+            }
+
+        .invoice-address {
+            text-align: right;
+            color: #7E88C3;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .invoice-dates {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-bottom: 48px;
+        }
+
+        .date-group h3 {
+            color: #7E88C3;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .date-group p {
+            color: #0C0E16;
+            font-weight: bold;
+        }
+
+        .items-list {
+            background: #F9FAFE;
+            border-radius: 8px;
+            padding: 32px;
+            margin-top: 40px;
+        }
+
+        .items-header {
+            display: grid;
+            grid-template-columns: 3fr 1fr 2fr 2fr;
+            color: #7E88C3;
+            margin-bottom: 32px;
+        }
+
+        .amount-due {
+            background: #373B53;
+            color: white;
+            padding: 32px;
+            border-radius: 0 0 8px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .amount-due-label {
+            font-size: 14px;
+        }
+
+        .amount-due-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .trash-icon {
+            cursor: pointer;
+            color: #888EA0;
+            font-size: 18px;
+        }
+
+        .form-input[readonly] {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        .trash-icon {
+            cursor: pointer;
+            color: #888EA0;
+            font-size: 18px;
+        }
+
+        .form-input[readonly] {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        /* Updated styles for item rows */
+        .item-header,
+        .item-row {
+            display: grid;
+            grid-template-columns: 3fr 1fr 2fr 2fr 40px;
+            gap: 16px;
+            align-items: center;
+        }
+
+            .item-row .form-input {
+                width: 100%;
+            }
+
+            .item-row .total {
+                text-align: right;
+            }
+
+        .invoice-dates {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 48px;
+        }
+
+        .date-group h3 {
+            color: #7E88C3;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .date-group p {
+            color: #0C0E16;
+            font-weight: bold;
+        }
+
+        .date-group div {
+            color: #7E88C3;
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+
+        .invoice-details {
+            background: white;
+            border-radius: 8px;
+            padding: 48px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .invoice-id {
+            font-size: 16px;
+            color: #0C0E16;
+            font-weight: bold;
+        }
+
+            .invoice-id span {
+                color: #7E88C3;
+            }
+
+        .invoice-address {
+            text-align: right;
+            color: #7E88C3;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .invoice-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 48px;
+        }
+
+        .date-group {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .invoice-date,
+        .payment-due,
+        .bill-to,
+        .sent-to {
+            margin-bottom: 8px;
+        }
+
+        h3 {
+            color: #7E88C3;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: #0C0E16;
+            font-weight: bold;
+        }
+
+        .address {
+            color: #7E88C3;
+            line-height: 1.6;
+            margin-top: 8px;
+        }
+        .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.status-badge[data-status="Beklemede"] {
+    background: rgba(255, 143, 0, 0.1);
+    color: #FF8F00;
+}
+
+.status-badge[data-status="Ödendi"] {
+    background: rgba(51, 214, 159, 0.1);
+    color: #33D69F;
+}
+
+.status-badge[data-status="Taslak"] {
+    background: rgba(223, 227, 250, 0.1);
+    color: #373B53;
+}
+
+.status-badge[data-status="Silindi"] {
+    background: rgba(236, 87, 87, 0.1);
+    color: #EC5757;
+}
+
+.button-paid:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo">
+            <!-- Logo content -->
+        </div>
+        <div class="sidebar-bottom">
+            <div class="theme-toggle">🌙</div>
+            <div class="avatar"></div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <a href="/Home/Index" class="back-link">← Go back</a>
+
+        <div class="status-bar">
+    <div>
+        <span class="status-label">Status</span>
+        <span id="statusBadge" class="status-badge" data-status="@Model.PaymentStatus">
+            @Model.PaymentStatus
+        </span>
+    </div>
+    <div class="button-group">
+        <button class="button button-edit" id="editButton">Edit</button>
+        <button class="button button-delete" id="deleteButton" data-id="@Model.Id" data-name="@Model.InvoiceName">Delete</button>
+        <form asp-action="MarkAsPaid" asp-controller="Invoice" method="post" id="markAsPaidForm">
+            <input type="hidden" name="id" value="@Model.Id" />
+            @Html.AntiForgeryToken()
+            <button type="submit" class="button button-paid" id="markAsPaidButton" @(Model.PaymentStatus == Status.Ödendi ? "disabled" : "")>
+                Mark as Paid
+            </button>
+        </form>
+    </div>
+</div>
+
+        <div class="invoice-details">
+            <div class="invoice-header">
+                <div class="invoice-id">
+                    @Model.InvoiceName
+                    <div>@Model.ProjectDescription</div>
+                </div>
+                <div class="invoice-address">
+                    @ViewBag.Users.StreetAddress<br>
+                    @ViewBag.Users.City<br>
+                    @ViewBag.Users.PostCode<br>
+                    @ViewBag.Users.Country
+                </div>
+            </div>
+
+            <div class="invoice-info">
+                <div class="date-group">
+                    <div class="invoice-date">
+                        <h3>Invoice Date</h3>
+                        <p>@Model.InvoiceDate.ToString("dd MMMM yyyy")</p>
+                    </div>
+                    <div class="payment-due">
+                        <h3>Payment Due</h3>
+                        <p>@Model.PaymentDue.ToString("dd MMMM yyyy")</p>
+                    </div>
+                </div>
+                <div class="bill-to">
+                    <h3>Bill To</h3>
+                    <p>@Model.Client.Name</p>
+                    <div class="address">
+                        @Model.Client.Address<br>
+                        @Model.Client.City<br>
+                        @Model.Client.PostCode<br>
+                        @Model.Client.Country
+                    </div>
+                </div>
+                <div class="sent-to">
+                    <h3>Sent to</h3>
+                    <p>@Model.Client.Email</p>
+                </div>
+            </div>
+
+            <div class="items-list">
+                <div class="items-header">
+                    <div>Item Name</div>
+                    <div>QTY.</div>
+                    <div>Price</div>
+                    <div>Total</div>
+                </div>
+                @foreach (var item in Model.Items)
+                {
+                    <div class="item-row">
+                        <div class="item-name">@item.Name</div>
+                        <div>@item.Quantity</div>
+                        <div>@item.Price.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</div>
+                        <div>@item.TotalPrice.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</div>
+                    </div>
+                }
+            </div>
+
+            <div class="amount-due">
+                <div class="amount-due-label">Amount Due</div>
+                <div class="amount-due-value">@Model.Items.Sum(x => x.Quantity * x.Price).ToString("C", new System.Globalization.CultureInfo("tr-TR"))</div>
+            </div>
+        </div>
+    </main>
+
+    <div class="edit-panel" id="editPanel">
+        <h1 class="edit-title">Edit @Model.InvoiceName</h1>
+        <form method="post" action="/Invoice/EditInvoice" id="editForm">
+            <input type="hidden" name="Id" value="@Model.Id" />
+            <input type="hidden" name="InvoiceName" value="@Model.InvoiceName" />
+
+            <div class="form-section">
+                <h2 class="section-title">Bill From</h2>
+                <div class="form-group">
+                    <label class="form-label">Street Address</label>
+                    <input type="text" class="form-input" name="StreetAddress" value="@ViewBag.Users.StreetAddress">
+                </div>
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label class="form-label">City</label>
+                        <input type="text" class="form-input" name="City" value="@ViewBag.Users.City">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Post Code</label>
+                        <input type="text" class="form-input" name="PostCode" value="@ViewBag.Users.PostCode">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Country</label>
+                        <input type="text" class="form-input" name="Country" value="@ViewBag.Users.Country">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2 class="section-title">Bill To</h2>
+                <div class="form-group">
+                    <label class="form-label">Client's Name</label>
+                    <input type="text" class="form-input" name="ClientName" value="@Model.Client.Name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Client's Email</label>
+                    <input type="email" class="form-input" name="ClientEmail" value="@Model.Client.Email">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Street Address</label>
+                    <input type="text" class="form-input" name="ClientStreet" value="@Model.Client.Address">
+                </div>
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label class="form-label">City</label>
+                        <input type="text" class="form-input" name="ClientCity" value="@Model.Client.City">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Post Code</label>
+                        <input type="text" class="form-input" name="ClientPostCode" value="@Model.Client.PostCode">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Country</label>
+                        <input type="text" class="form-input" name="ClientCountry" value="@Model.Client.Country">
+                    </div>
+                </div>
+            </div>
+
+            <div class="date-payment">
+                <div class="form-group">
+                    <label class="form-label">Invoice Date</label>
+                    <input type="date" class="form-input" name="InvoiceDate" value="@Model.InvoiceDate.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Payment Terms</label>
+                    <select class="form-input" name="PaymentTerm">
+                        @foreach (var term in Enum.GetValues(typeof(PaymentTerm)).Cast<PaymentTerm>())
+                        {
+                            <option value="@term" selected="@(Model.PaymentTerm == term ? "selected" : null)">@term</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Project Description</label>
+                <input type="text" class="form-input" name="Description" value="@Model.ProjectDescription">
+            </div>
+
+    <div class="item-list">
+        <h2 class="section-title">Item List</h2>
+        <div class="item-header">
+            <div class="form-label">Item Name</div>
+            <div class="form-label">Qty.</div>
+            <div class="form-label">Price</div>
+            <div class="form-label">Total</div>
+            <div></div>
+        </div>
+        <div id="itemRows">
+            @foreach (var item in Model.Items)
+            {
+                <div class="item-row" data-id="@item.Id">
+                    <input type="hidden" name="Items.Index" value="@item.Id" />
+                    <input type="hidden" name="Items[@item.Id].Id" value="@item.Id">
+                    <input type="text" class="form-input" name="Items[@item.Id].Name" value="@item.Name">
+                    <input type="number" class="form-input quantity" name="Items[@item.Id].Quantity" value="@item.Quantity">
+                    <input type="number" class="form-input price" name="Items[@item.Id].Price" value="@item.Price">
+                    <input type="text" class="form-input total" value="@item.TotalPrice.ToString("C", new System.Globalization.CultureInfo("tr-TR"))" readonly>
+                    <span class="trash-icon" role="button" tabindex="0" aria-label="Delete item">🗑️</span>
+                </div>
+            }
+        </div>
+        <button type="button" class="add-item-btn">+ Add New Item</button>
+    </div>
+
+    <div class="form-footer">
+        <button type="button" class="btn btn-cancel" id="cancelEdit">Cancel</button>
+        <button type="submit" class="btn btn-save">Save Changes</button>
+    </div>
+        </form>
+                
+    </div>
+
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal">
+            <h2 class="modal-title">Confirm Deletion</h2>
+            <p class="modal-content" id="deleteMessage">Are you sure you want to delete this invoice? This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="btn btn-modal-cancel" id="cancelDelete">Cancel</button>
+
+                <!-- Form to trigger deletion -->
+                <form id="deleteForm" method="post" action="/Invoice/DeleteInvoice">
+                    <input type="hidden" name="id" id="invoiceIdInput">
+                    <button type="button" class="btn btn-modal-delete" id="confirmDelete">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Add this just before the closing </body> tag -->
+    <div class="modal-overlay" id="deleteItemModal">
+        <div class="modal">
+            <h2 class="modal-title">Confirm Item Deletion</h2>
+            <p class="modal-content">Are you sure you want to delete this item? This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="btn btn-modal-cancel" id="cancelItemDelete">Cancel</button>
+                <button class="btn btn-modal-delete" id="confirmItemDelete">Delete</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const editButton = document.getElementById('editButton');
+            const cancelButton = document.getElementById('cancelEdit');
+            const editPanel = document.getElementById('editPanel');
+            const deleteButton = document.getElementById('deleteButton');
+            const deleteModal = document.getElementById('deleteModal');
+            const cancelDelete = document.getElementById('cancelDelete');
+            const confirmDelete = document.getElementById('confirmDelete');
+            const addItemBtn = document.querySelector('.add-item-btn');
+            const itemList = document.querySelector('.item-list');
+            const itemRows = document.getElementById('itemRows');
+            const deleteItemModal = document.getElementById('deleteItemModal');
+            const cancelItemDelete = document.getElementById('cancelItemDelete');
+            const confirmItemDelete = document.getElementById('confirmItemDelete');
+            let itemToDelete = null;
+
+            function addSafeEventListener(element, event, handler) {
+                if (element) {
+                    element.addEventListener(event, handler);
+                } else {
+                    console.warn(`Element not found for event: ${event}`);
+                }
+            }
+
+
+            addSafeEventListener(editButton, 'click', () => {
+                editPanel.classList.add('active');
+            });
+
+            addSafeEventListener(cancelButton, 'click', () => {
+                editPanel.classList.remove('active');
+            });
+
+            addSafeEventListener(deleteButton, 'click', () => {
+                const invoiceId = deleteButton.getAttribute('data-id');
+                const invoiceName = deleteButton.getAttribute('data-name');
+                document.getElementById('invoiceIdInput').value = invoiceId;
+                document.getElementById('deleteMessage').textContent = `Are you sure you want to delete invoice #${invoiceName}? This action cannot be undone.`;
+                deleteModal.classList.add('active');
+            });
+
+            addSafeEventListener(confirmDelete, 'click', () => {
+                document.getElementById('deleteForm').submit();
+            });
+
+            addSafeEventListener(cancelDelete, 'click', () => {
+                deleteModal.classList.remove('active');
+            });
+
+            let newItemId = -1; // Use negative IDs for new items
+
+            addSafeEventListener(addItemBtn, 'click', () => {
+                const newItemRow = document.createElement('div');
+                newItemRow.className = 'item-row';
+                newItemRow.dataset.id = newItemId;
+                newItemRow.innerHTML = `
+                    <input type="hidden" name="Items.Index" value="${newItemId}" />
+                    <input type="hidden" name="Items[${newItemId}].Id" value="${newItemId}">
+                    <input type="text" class="form-input" name="Items[${newItemId}].Name" placeholder="Item name">
+                    <input type="number" class="form-input quantity" name="Items[${newItemId}].Quantity" value="1">
+                    <input type="number" class="form-input price" name="Items[${newItemId}].Price" value="0.00">
+                    <input type="text" class="form-input total" value="₺ 0,00" readonly>
+                    <span class="trash-icon" role="button" tabindex="0" aria-label="Delete item">🗑️</span>
+                `;
+                itemRows.appendChild(newItemRow);
+                newItemId--;
+                updateTotals();
+            });
+
+            addSafeEventListener(itemRows, 'click', (e) => {
+                if (e.target.classList.contains('trash-icon')) {
+                    itemToDelete = e.target.closest('.item-row');
+                    deleteItemModal.classList.add('active');
+                }
+            });
+
+            addSafeEventListener(confirmItemDelete, 'click', () => {
+                if (itemToDelete) {
+                    itemToDelete.remove();
+                    updateTotals();
+                }
+                deleteItemModal.classList.remove('active');
+                itemToDelete = null;
+            });
+
+            addSafeEventListener(itemList, 'input', (e) => {
+                if (e.target.classList.contains('quantity') || e.target.classList.contains('price')) {
+                    updateTotals();
+                }
+            });
+            document.addEventListener('DOMContentLoaded', function() {
+    const markAsPaidForm = document.getElementById('markAsPaidForm');
+    const statusBadge = document.getElementById('statusBadge');
+    const markAsPaidButton = document.getElementById('markAsPaidButton');
+    function updateStatus(status) {
+        const statusTexts = ['Pending', 'Paid', 'Draft', 'Deleted'];
+        statusBadge.textContent = statusTexts[status];
+        statusBadge.dataset.status = status;
+        
+        if (status === 1) { // Paid
+            markAsPaidButton.disabled = true;
+        } else {
+            markAsPaidButton.disabled = false;
+        }
+    }
+    markAsPaidForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        fetch(this.action, {
+            method: 'POST',
+            body: new FormData(this),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                statusBadge.textContent = 'Paid';
+                statusBadge.className = 'status-badge paid';
+                markAsPaidButton.disabled = true;
+            } else {
+                alert('Failed to update status. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
+    });
+});
+            function updateTotals() {
+                const rows = itemRows.querySelectorAll('.item-row');
+                let grandTotal = 0;
+
+                rows.forEach(row => {
+                    const quantity = parseFloat(row.querySelector('.quantity').value) || 0;
+                    const price = parseFloat(row.querySelector('.price').value) || 0;
+                    const total = quantity * price;
+                    row.querySelector('.total').value = `₺ ${total.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    grandTotal += total;
+                });
+
+                const amountDueElement = document.querySelector('.amount-due-value');
+                if (amountDueElement) {
+                    amountDueElement.textContent = `₺ ${grandTotal.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                }
+            }
+
+            // Initial update
+            updateTotals();
+        });
+    </script>
+</body>
+</html>

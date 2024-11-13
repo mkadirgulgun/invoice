@@ -1,0 +1,355 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Invoice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 80px;
+            background-color: #1e293b;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            height: 80px;
+            background-color: #8b5cf6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo-circle {
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            border-top: 1px solid #334155;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #d1d5db;
+            border-radius: 50%;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 80px;
+            padding: 32px;
+            max-width: 800px;
+        }
+
+        .form-title {
+            color: #1e293b;
+            font-size: 24px;
+            margin-bottom: 48px;
+        }
+
+        .form-section {
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            color: #8b5cf6;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .input-full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .form-input {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #1e293b;
+            width: 100%;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+        }
+
+        .items-list {
+            margin-bottom: 24px;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 3fr 1fr 2fr 2fr 40px;
+            gap: 16px;
+            margin-bottom: 16px;
+            align-items: end;
+        }
+
+        .item-total {
+            padding: 12px;
+            background-color: #f8fafc;
+            border-radius: 4px;
+            color: #64748b;
+        }
+
+        .delete-btn {
+            color: #64748b;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .add-item-btn {
+            color: #64748b;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 12px;
+            width: 100%;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .add-item-btn:hover {
+            color: #8b5cf6;
+        }
+
+        .form-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 32px;
+        }
+
+        .btn {
+            padding: 16px 24px;
+            border-radius: 24px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .btn-cancel {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+
+        .btn-save {
+            background-color: #8b5cf6;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-circle"></div>
+            </div>
+            <div class="sidebar-bottom">
+                <svg width="24" height="24" fill="#94a3b8" viewBox="0 0 24 24">
+                    <path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Z" />
+                </svg>
+                <div class="user-avatar"></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <h1 class="form-title">Edit #XM9141</h1>
+
+            <form>
+                <div class="form-section">
+                    <h2 class="section-title">Bill From</h2>
+                    <div class="input-grid">
+                        <div class="form-group input-full">
+                            <label class="form-label">Street Address</label>
+                            <input type="text" class="form-input" value="19 Union Terrace">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">City</label>
+                            <input type="text" class="form-input" value="London">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Post Code</label>
+                            <input type="text" class="form-input" value="E1 3EZ">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Country</label>
+                            <input type="text" class="form-input" value="United Kingdom">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title">Bill To</h2>
+                    <div class="input-grid">
+                        <div class="form-group input-full">
+                            <label class="form-label">Client's Name</label>
+                            <input type="text" class="form-input" value="Alex Grim">
+                        </div>
+                        <div class="form-group input-full">
+                            <label class="form-label">Client's Email</label>
+                            <input type="email" class="form-input" value="alexgrim@mail.com">
+                        </div>
+                        <div class="form-group input-full">
+                            <label class="form-label">Street Address</label>
+                            <input type="text" class="form-input" value="84 Church Way">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">City</label>
+                            <input type="text" class="form-input" value="Bradford">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Post Code</label>
+                            <input type="text" class="form-input" value="BD1 9PB">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Country</label>
+                            <input type="text" class="form-input" value="United Kingdom">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="input-grid">
+                        <div class="form-group">
+                            <label class="form-label">Invoice Date</label>
+                            <input type="date" class="form-input" value="2021-08-21">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Payment Terms</label>
+                            <select class="form-input">
+                                <option>Net 30 Days</option>
+                                <option>Net 14 Days</option>
+                                <option>Net 7 Days</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Project Description</label>
+                            <input type="text" class="form-input" value="Graphic Design">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2 class="section-title">Item List</h2>
+                    <div class="items-list">
+                        <div class="item-row">
+                            <div class="form-group">
+                                <label class="form-label">Item Name</label>
+                                <input type="text" class="form-input" value="Banner Design">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Qty.</label>
+                                <input type="number" class="form-input" value="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Price</label>
+                                <input type="number" class="form-input" value="156.00">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Total</label>
+                                <div class="item-total">156.00</div>
+                            </div>
+                            <button type="button" class="delete-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="#64748b">
+                                    <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="item-row">
+                            <div class="form-group">
+                                <label class="form-label">Item Name</label>
+                                <input type="text" class="form-input" value="Email Design">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Qty.</label>
+                                <input type="number" class="form-input" value="2">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Price</label>
+                                <input type="number" class="form-input" value="200.00">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Total</label>
+                                <div class="item-total">400.00</div>
+                            </div>
+                            <button type="button" class="delete-btn">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="#64748b">
+                                    <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="add-item-btn">+ Add New Item</button>
+                </div>
+
+                <div class="form-footer">
+                    <button type="button" class="btn btn-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-save">Save Changes</button>
+                </div>
+            </form>
+        </main>
+    </div>
+</body>
+</html>

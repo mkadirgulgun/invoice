@@ -1,0 +1,1133 @@
+﻿@model List<InvoiceModel>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Dashboard</title>
+    <style>
+        /* Add this new style for the invoice link */
+        .invoice-link {
+            text-decoration: none;
+            color: inherit;
+            display: contents;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 80px;
+            background-color: #1e293b;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            z-index: 30;
+        }
+
+        .logo {
+            height: 80px;
+            background-color: #8b5cf6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo-circle {
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            border-top: 1px solid #334155;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #d1d5db;
+            border-radius: 50%;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 80px;
+            padding: 32px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 48px;
+        }
+
+        .title-section h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #64748b;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .filter-dropdown {
+            padding: 12px 24px;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            background-color: white;
+        }
+
+        .new-invoice-btn {
+            background-color: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .invoice-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .invoice-item {
+            background-color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+            .invoice-item:hover {
+                border: 1px solid #8b5cf6;
+            }
+
+        .invoice-details {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .invoice-id {
+            font-weight: bold;
+        }
+
+            .invoice-id span {
+                color: #94a3b8;
+            }
+
+        .invoice-date, .invoice-name {
+            color: #64748b;
+        }
+
+        .invoice-amount {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .status-badge::before {
+                content: "";
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+            }
+
+        .status-paid {
+            background-color: #dcfce7;
+            color: #22c55e;
+        }
+
+            .status-paid::before {
+                background-color: #22c55e;
+            }
+
+        .status-pending {
+            background-color: #fff7ed;
+            color: #f97316;
+        }
+
+            .status-pending::before {
+                background-color: #f97316;
+            }
+
+        .status-draft {
+            background-color: #f1f5f9;
+            color: #64748b;
+        }
+
+            .status-draft::before {
+                background-color: #64748b;
+            }
+
+        /* New Invoice Form Sliding Panel */
+        .new-invoice-panel {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            max-width: 720px;
+            height: 100vh;
+            background-color: white;
+            padding: 32px;
+            transition: left 0.3s ease-in-out;
+            overflow-y: auto;
+            z-index: 20;
+            margin-left: 80px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+            .new-invoice-panel.active {
+                left: 0;
+            }
+
+        .form-section {
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            color: #8b5cf6;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .input-full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            padding: 16px 24px;
+            border-radius: 24px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .btn-discard {
+            color: #8b5cf6;
+            background: none;
+        }
+
+        .btn-draft {
+            background-color: #1e293b;
+            color: #94a3b8;
+        }
+
+        .btn-send {
+            background-color: #8b5cf6;
+            color: white;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+            z-index: 10;
+        }
+
+            .overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+        /* Add New Item Button */
+        .add-item-btn {
+            color: #8b5cf6;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 12px;
+            width: 100%;
+            text-align: left;
+            font-weight: 500;
+        }
+
+            .add-item-btn:hover {
+                color: #7c3aed;
+            }
+
+        /* Items List */
+        .items-list {
+            margin-bottom: 24px;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 3fr 1fr 2fr 2fr 40px;
+            gap: 16px;
+            margin-bottom: 16px;
+            align-items: end;
+        }
+
+        .delete-btn {
+            color: #64748b;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 80px;
+            padding: 32px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+            .main-content.shifted {
+                transform: translateX(720px);
+            }
+
+        /* ... (previous styles for invoice list and items remain the same) ... */
+
+        /* New Invoice Panel Styles */
+        .new-invoice-panel {
+            position: fixed;
+            top: 0;
+            left: -720px; /* Start offscreen */
+            width: 720px;
+            height: 100vh;
+            background-color: #f8fafc;
+            padding: 32px;
+            transition: left 0.3s ease-in-out;
+            overflow-y: auto;
+            z-index: 20;
+            margin-left: 80px; /* Account for sidebar width */
+            box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
+        }
+
+            .new-invoice-panel.active {
+                left: 0;
+            }
+
+        /* Overlay for background dimming */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+            z-index: 10;
+        }
+
+            .overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+        /* Ensure the form container is properly styled */
+        .new-invoice-form {
+            background-color: #f8fafc;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Add smooth transition for all interactive elements */
+        button, input, select {
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* Ensure the panel scrolls properly */
+        .new-invoice-panel {
+            scrollbar-width: thin;
+            scrollbar-color: #8b5cf6 #f1f5f9;
+        }
+
+            .new-invoice-panel::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .new-invoice-panel::-webkit-scrollbar-track {
+                background: #f1f5f9;
+            }
+
+            .new-invoice-panel::-webkit-scrollbar-thumb {
+                background-color: #8b5cf6;
+                border-radius: 4px;
+            }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 80px;
+            background-color: #1e293b;
+            position: fixed;
+            height: 100vh;
+            z-index: 40;
+        }
+
+        .logo {
+            height: 80px;
+            background-color: #7c3aed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-circle {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 80px;
+            padding: 32px;
+            transition: transform 0.3s ease;
+        }
+
+            .main-content.shifted {
+                transform: translateX(620px);
+            }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .title h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #64748b;
+        }
+
+        .actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .filter-status {
+            padding: 12px 24px;
+            border: none;
+            background: white;
+            border-radius: 24px;
+            font-size: 15px;
+        }
+
+        .new-invoice-btn {
+            background: #7c3aed;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* New Invoice Panel */
+        .new-invoice-panel {
+            position: fixed;
+            top: 0;
+            left: -620px;
+            width: 620px;
+            height: 100vh;
+            background: white;
+            z-index: 30;
+            transition: left 0.3s ease;
+            padding: 32px;
+            overflow-y: auto;
+            margin-left: 80px;
+        }
+
+            .new-invoice-panel.active {
+                left: 0;
+            }
+
+        .section-title {
+            color: #7c3aed;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+            .form-group label {
+                display: block;
+                color: #64748b;
+                font-size: 13px;
+                margin-bottom: 8px;
+            }
+
+            .form-group input,
+            .form-group select {
+                width: 100%;
+                padding: 12px;
+                border: 1px solid #e2e8f0;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+
+        .address-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Item List */
+        .item-list {
+            margin-bottom: 24px;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 3fr 1fr 2fr 2fr 40px;
+            gap: 16px;
+            margin-bottom: 16px;
+            align-items: end;
+        }
+
+        .delete-item {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .add-item-btn {
+            width: 100%;
+            padding: 12px;
+            background: #f8fafc;
+            border: none;
+            border-radius: 4px;
+            color: #7c3aed;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 32px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            padding: 16px 24px;
+            border-radius: 24px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-discard {
+            background: none;
+            color: #7c3aed;
+        }
+
+        .btn-draft {
+            background: #1e293b;
+            color: #94a3b8;
+        }
+
+        .btn-send {
+            background: #7c3aed;
+            color: white;
+        }
+
+        /* Client Search Results */
+        .client-search-container {
+            position: relative;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 10;
+        }
+
+        .search-result {
+            padding: 12px;
+            cursor: pointer;
+        }
+
+            .search-result:hover {
+                background: #f8fafc;
+            }
+
+        .new-client-option {
+            padding: 12px;
+            background: #f1f5f9;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 20;
+        }
+
+            .overlay.active {
+                opacity: 1;
+                visibility: visible;
+            }
+            .invoice-amount {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .status-badge {
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 14px;
+        text-transform: capitalize;
+    }
+
+    .status-badge[data-status="0"] {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+
+    .status-badge[data-status="1"] {
+        background-color: #dcfce7;
+        color: #16a34a;
+    }
+
+    .status-badge[data-status="2"] {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-circle"></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="header">
+                <div class="title">
+                    <h1>Invoices</h1>
+                    <p class="subtitle">There are @Model.Count total invoices</p>
+                </div>
+                <div class="actions">
+                    <select id="statusFilter" class="filter-status">
+    <option value="all" selected>All</option>
+    <option value="0">Pending</option>
+    <option value="1">Paid</option>
+    <option value="2">Draft</option>
+</select>
+                    <button class="new-invoice-btn" onclick="showNewInvoiceForm()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+                        </svg>
+                        New Invoice
+                    </button>
+                </div>
+            </div>
+            <div class="invoice-list">
+            @foreach (var item in Model)
+            {
+                <a href="/Invoice/InvoiceDetail/@item.Id" class="invoice-link">
+
+                    <div class="invoice-item">
+    <div class="invoice-details">
+        <span class="invoice-id">@item.InvoiceName</span>
+        <span class="invoice-date">Due @item.PaymentDue.ToString("dd MMM yyyy")</span>
+        <span class="invoice-client">@item.Client.Name</span>
+    </div>
+    <div class="invoice-details">
+        <span class="invoice-amount">@item.TotalAmount.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</span>
+        <span class="status-badge" data-status="@((int)item.PaymentStatus)">
+            @item.PaymentStatus
+        </span>
+        <svg class="chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
+        </svg>
+    </div>
+</div>
+                </a>
+            }
+            </div>
+            <!-- Invoice list content here -->
+        </main>
+
+        <div class="new-invoice-panel" id="newInvoicePanel">
+            <h2>New Invoice</h2>
+
+            <form id="invoiceForm" action="/Invoice/CreateInvoice" method="post">
+                <div class="form-group">
+                    <h3 class="section-title">Bill From</h3>
+                    <div class="address-grid">
+                        <div class="full-width">
+                            <label>Street Address</label>
+                            <input type="text" name="StreetAddress" required value="@ViewBag.Users.StreetAddress">
+                        </div>
+                        <div>
+                            <label>City</label>
+                            <input type="text" name="City" required value="@ViewBag.Users.City">
+                        </div>
+                        <div>
+                            <label>Post Code</label>
+                            <input type="text" name="PostCode" required value="@ViewBag.Users.PostCode">
+                        </div>
+                        <div>
+                            <label>Country</label>
+                            <input type="text" name="Country" required value="@ViewBag.Users.Country">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <h3 class="section-title">Bill To</h3>
+                    <div class="address-grid">
+                        <div class="full-width client-search-container">
+                            <label>Client's Name</label>
+                            <input type="text" name="ClientName" id="clientSearch" required>
+                            <div class="search-results" id="searchResults"></div>
+                        </div>
+                        <div class="full-width">
+                            <label>Client's Email</label>
+                            <input type="email" name="ClientEmail" id="clientEmail" required>
+                        </div>
+                        <div class="full-width">
+                            <label>Street Address</label>
+                            <input type="text" name="ClientStreet" id="clientStreet" required>
+                        </div>
+                        <div>
+                            <label>City</label>
+                            <input type="text" name="ClientCity" id="clientCity" required>
+                        </div>
+                        <div>
+                            <label>Post Code</label>
+                            <input type="text" name="ClientPostCode" id="clientPostCode" required>
+                        </div>
+                        <div>
+                            <label>Country</label>
+                            <input type="text" name="ClientCountry" id="clientCountry" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="address-grid">
+                        <div>
+                            <label>Invoice Date</label>
+                            <input type="date" name="InvoiceDate" required>
+                        </div>
+                        <div>
+                            <label>Payment Terms</label>
+                            <select name="PaymentTerm" required>
+                                <option value="3">Net 30 Days</option>
+                                <option value="2">Net 14 Days</option>
+                                <option value="1">Net 7 Days</option>
+                                <option value="0">Net 1 Days</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Project Description</label>
+                            <input type="text" name="description" placeholder="e.g. Graphic Design" >
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <h3 class="section-title">Item List</h3>
+                    <div class="item-list" id="itemList">
+                        <!-- Items will be added here -->
+                    </div>
+                    <button type="button" class="add-item-btn" onclick="addNewItem()">+ Add New Item</button>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-discard" onclick="hideNewInvoiceForm()">Discard</button>
+                    <div>
+                        <button type="button" class="btn btn-draft">Save as Draft</button>
+                        <button type="submit" class="btn btn-send">Save & Send</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="overlay" id="overlay" onclick="hideNewInvoiceForm()"></div>
+    </div>
+                
+                
+
+    <script>
+        // Show/Hide New Invoice Form
+        function showNewInvoiceForm() {
+            document.getElementById('newInvoicePanel').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+            document.querySelector('.main-content').classList.add('shifted');
+        }
+
+        function hideNewInvoiceForm() {
+            document.getElementById('newInvoicePanel').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+            document.querySelector('.main-content').classList.remove('shifted');
+        }
+        const clientSearch = document.getElementById('clientSearch');
+        const searchResults = document.getElementById('searchResults');
+
+        clientSearch.addEventListener('input', debounce(async () => {
+            const searchTerm = clientSearch.value.trim();
+            if (searchTerm.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            try {
+                // Fetch isteğinde aranan terimi dinamik olarak rotaya ekleyin
+                const response = await fetch(`/Client/${searchTerm}`);
+                const clients = await response.json();
+
+                searchResults.innerHTML = '';
+                clients.forEach(client => {
+                    const div = document.createElement('div');
+                    div.className = 'search-result';
+                    div.textContent = client.name;
+                    div.onclick = () => selectClient(client);  // selectClient fonksiyonu burada çalıştırılıyor
+                    searchResults.appendChild(div);
+                });
+
+                const newClientOption = document.createElement('div');
+                newClientOption.className = 'new-client-option';
+                newClientOption.textContent = 'Add as new client';
+                newClientOption.onclick = clearClientFields;  // clearClientFields fonksiyonu burada çalıştırılıyor
+                searchResults.appendChild(newClientOption);
+
+                searchResults.style.display = 'block';
+            } catch (error) {
+                console.error('Error searching clients:', error);
+            }
+        }, 300));
+
+        function clearClientFields() {
+            // Müşteri arama alanlarını temizle
+            document.getElementById('clientSearch').value = '';
+            document.getElementById('clientEmail').value = '';
+            document.getElementById('clientStreet').value = '';
+            document.getElementById('clientCity').value = '';
+            document.getElementById('clientPostCode').value = '';
+            document.getElementById('clientCountry').value = '';
+        }
+
+        function selectClient(client) {
+            // Müşteri bilgilerini form alanlarına doldur
+            document.getElementById('clientSearch').value = client.name;
+            document.getElementById('clientEmail').value = client.email;
+            document.getElementById('clientStreet').value = client.street;
+            document.getElementById('clientCity').value = client.city;
+            document.getElementById('clientPostCode').value = client.postCode;
+            document.getElementById('clientCountry').value = client.country;
+
+            // Arama sonuçlarını gizle
+            searchResults.style.display = 'none';
+        }
+
+
+
+        let itemCount = 0; // Sayacı başlatıyoruz.
+
+        function addNewItem() {
+            const itemList = document.getElementById('itemList');
+            const itemRow = document.createElement('div');
+            itemRow.className = 'item-row';
+
+            // Yeni item satırını oluşturuyoruz
+            itemRow.innerHTML = `
+                <div class="form-group">
+                    <label>Item Name</label>
+                    <input type="text" name="Items[${itemCount}].Name" required>
+                </div>
+                <div class="form-group">
+                    <label>Qty.</label>
+                    <input type="number" name="Items[${itemCount}].Quantity" min="1" required onchange="calculateTotal(this.parentElement.parentElement)">
+                </div>
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="number" name="Items[${itemCount}].Price" min="0" step="0.1" required onchange="calculateTotal(this.parentElement.parentElement)">
+                </div>
+                <div class="form-group">
+                    <label>Total</label>
+                    <input type="text" name="Items[${itemCount}].Total" readonly>
+                </div>
+                <button type="button" class="delete-item" onclick="deleteItem(this.parentElement)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+                    </svg>
+                </button>
+            `;
+
+            itemList.appendChild(itemRow);
+            itemCount++; // Yeni item eklendikçe sayaç artırılır.
+        }
+
+        function deleteItem(row) {
+            row.remove();
+            itemCount--; // Silindiğinde sayaç geri alınır.
+        }
+
+        function calculateTotal(row) {
+            const qty = parseFloat(row.querySelector('input[name*="Quantity"]').value) || 0;
+            const price = parseFloat(row.querySelector('input[name*="Price"]').value) || 0;
+            const total = qty * price;
+            row.querySelector('input[name*="Total"]').value = total.toFixed(2);
+        }
+
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+    const statusFilter = document.getElementById('statusFilter');
+    const invoiceItems = document.querySelectorAll('.invoice-item');
+    const statusBadges = document.querySelectorAll('.status-badge');
+
+    // Function to update status badge colors and text
+    function updateStatusBadges() {
+        statusBadges.forEach(badge => {
+            const status = parseInt(badge.getAttribute('data-status'));
+            switch(status) {
+                case 0:
+                    badge.textContent = 'Beklemede';
+                    badge.style.backgroundColor = '#fef3c7';
+                    badge.style.color = '#d97706';
+                    break;
+                case 1:
+                    badge.textContent = 'Ödendi';
+                    badge.style.backgroundColor = '#dcfce7';
+                    badge.style.color = '#16a34a';
+                    break;
+                case 2:
+                    badge.textContent = 'Taslak';
+                    badge.style.backgroundColor = '#f1f5f9';
+                    badge.style.color = '#64748b';
+                    break;
+                default:
+                    badge.textContent = 'Unknown';
+                    badge.style.backgroundColor = '#e5e7eb';
+                    badge.style.color = '#374151';
+            }
+        });
+    }
+
+    // Function to update invoice count
+    function updateInvoiceCount() {
+        const visibleInvoices = document.querySelectorAll('.invoice-item:not([style*="display: none"])').length;
+        const subtitleElement = document.querySelector('.subtitle');
+        subtitleElement.textContent = `There are ${visibleInvoices} total invoices`;
+    }
+
+    // Filter functionality
+    statusFilter.addEventListener('change', function() {
+        const selectedStatus = this.value;
+        
+        invoiceItems.forEach(item => {
+            const statusBadge = item.querySelector('.status-badge');
+            const itemStatus = statusBadge.getAttribute('data-status');
+            
+            if (selectedStatus === 'all' || selectedStatus === itemStatus) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        updateInvoiceCount();
+    });
+
+    // Initialize status badges and invoice count
+    updateStatusBadges();
+    updateInvoiceCount();
+
+    // Set initial filter to 'All'
+    statusFilter.value = 'all';
+});
+//     // Initialize status badges
+//     const statusBadges = document.querySelectorAll('.status-badge');
+//     statusBadges.forEach(badge => {
+//         const status = parseInt(badge.getAttribute('data-status'));
+//         switch(status) {
+//             case 0:
+//                 badge.textContent = 'Pending';
+//                 break;
+//             case 1:
+//                 badge.textContent = 'Paid';
+//                 break;
+//             case 2:
+//                 badge.textContent = 'Draft';
+//                 break;
+//             default:
+//                 badge.textContent = 'Unknown';
+//         }
+//     });
+
+//     // Set initial filter to 'All'
+//     statusFilter.value = 'all';
+//     updateInvoiceCount();
+// });
+        // Close search results when clicking outside
+        document.addEventListener('click', function (event) {
+            if (!event.target.closest('.client-search-container')) {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        // Add initial item row
+        addNewItem();
+    </script>
+</body>
+</html>
